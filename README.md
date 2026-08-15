@@ -1,9 +1,5 @@
 # SSO Laravel Demo
 
-A production-ready **Single Sign-On (SSO) demonstration** built with Laravel 13, implementing JWT-based authentication with role-based access control across multiple products/services.
-
----
-
 ## 📋 Project Overview
 
 This demo showcases a complete SSO workflow designed for implementation in a multi-product ecosystem. It demonstrates how a central authentication service can issue JWT tokens containing user identity, roles, and product access scope — enabling seamless authentication across multiple applications sharing the same user base.
