@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('user_product_metadata', function (Blueprint $table) {
             $table->id();
-            $table->string('mobile_number', 15)->unique()->index();
-            $table->string('name');
-            $table->string('email')->nullable();
-            $table->string('emp_code')->nullable()->unique();
-            $table->boolean('status')->default(true);
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->json('attributes'); // Holds legacy specific fields
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('user_product_metadata');
     }
 };

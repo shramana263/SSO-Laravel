@@ -2,47 +2,24 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject; // Assuming JWT-Auth
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, HasRoles, SoftDeletes;
+    protected $fillable = ['mobile_number', 'name', 'email', 'emp_code', 'status'];
 
-    protected $fillable = [
-        'mobile_number',
-        'country_code',
-        'name',
-        'email',
-        'is_active',
-        'last_login_at',
-    ];
-
-    protected $casts = [
-        'is_active' => 'boolean',
-        'last_login_at' => 'datetime',
-    ];
-
-    public function getJWTIdentifier()
+    public function productAccess(): HasMany
     {
-        return $this->getKey();
+        return $this->hasMany(UserProductAccess::class);
     }
 
-    public function getJWTCustomClaims(): array
+    public function productMetadata(): HasMany
     {
-        return [
-            'mobile_number' => $this->mobile_number,
-            'roles' => $this->getRoleNames(),
-        ];
+        return $this->hasMany(UserProductMetadata::class);
     }
+
+    public function getJWTIdentifier() { return $this->getKey(); }
+    public function getJWTCustomClaims() { return []; }
 }

@@ -9,8 +9,8 @@ return new class extends Migration {
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('slug')->unique(); // Matches the role, e.g., 'product_1'
-            $table->string('redirect_url'); // The exact URL to send the user to
+            $table->string('slug', 50)->unique(); // star_saathi, star_sfa, star_link, star_steller
+            $table->string('name', 100);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

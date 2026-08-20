@@ -4,8 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+// use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Exception;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class VerifySsoToken
 {
