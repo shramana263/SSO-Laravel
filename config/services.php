@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'sms' => [
+        'username' => env('SMS_GATEWAY_USERNAME'),
+        'password' => env('SMS_GATEWAY_PASSWORD'),
+        'sender_id' => env('SMS_SENDER_ID', 'STARCM'),
+        'template_id' => env('SMS_TEMPLATE_ID'),
+    ],
+
 ];

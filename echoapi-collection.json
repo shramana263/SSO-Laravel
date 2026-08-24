@@ -1,0 +1,643 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+    "name": "SSO Laravel API",
+    "description": "EchoAPI test collection for the SSO Laravel API — now running against REAL production user data synced from legacy product databases.\n\n## How To Use\n1. Run a **Send OTP** request\n2. Immediately run the matching **Verify OTP** request — it automatically saves the JWT into `{{auth_token}}`\n3. Run any **Launch Product** request (uses the last verified user's token)\n4. To switch users, re-run Send OTP + Verify OTP for that user, then Launch\n\n## Real Test Users (synced from legacy prod DBs)\n| Mobile | Name | Source | Products |\n|---|---|---|---|\n| 9239674825 | BISWARUP NASKAR | Stellar te_master (acedns=Y) | star_steller (TE) + star_sfa (Employee) — cross-product proof |\n| 9932209994 | PRIYABRATA ROY | Stellar engineer_master (ACTIVE) | star_steller (Site Engineer) |\n| 7070894886 | KUMAR NISHANT | SFA employee_master (acedns=Y) | star_sfa (Employee) |\n| 9862216455 | BANKA BEHARI PAUL | Saathi customer_master (acedns=Y) | star_saathi (dealer) |\n| 6002041778 | Moinul hoque | Link users (role=2 Mason, GOLD cat., 113 dealers) | star_link (Contractor) |\n| 8876382675 | SHYAMAL DAS | Link users (role=1 BDE) | star_link (BDE) |\n\nOTP is always **123456** in local environment.\n\nAny phone NOT in the central DB (e.g. filtered out during sync: acedns='N', INACTIVE engineers, dirty numbers, Link roles other than BDE/Mason) returns `404 User not found` on send-otp — this is correct central behaviour.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api"
+    },
+    {
+      "key": "test_otp",
+      "value": "123456"
+    },
+    {
+      "key": "auth_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "description": "Send OTP first, then Verify OTP. Verify automatically stores the JWT in {{auth_token}}.",
+      "item": [
+        {
+          "name": "Send OTP - BISWARUP NASKAR (Stellar TE + SFA)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"9239674825\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "send-otp"]
+            },
+            "description": "Real user from src_stellar.te_master. Expect 200 {\"status\":true,\"message\":\"OTP sent successfully\"}"
+          }
+        },
+        {
+          "name": "Send OTP - PRIYABRATA ROY (Stellar Engineer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"9932209994\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Send OTP - KUMAR NISHANT (SFA Employee)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"7070894886\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Send OTP - BANKA BEHARI PAUL (Saathi Dealer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"9862216455\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Send OTP - Moinul hoque (Link Mason)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"6002041778\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Send OTP - SHYAMAL DAS (Link BDE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"8876382675\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP - BISWARUP (token -> auth_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.status === true) {",
+                  "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
+                  "    console.log('Token saved to auth_token:', res.star_one_session_token.substring(0, 25) + '...');",
+                  "    console.log('User:', res.user.name);",
+                  "    console.log('Allowed products:', JSON.stringify(res.allowed_products, null, 2));",
+                  "} else {",
+                  "    console.log('Verify failed:', res.message);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"9239674825\",\n  \"otp\": \"{{test_otp}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "verify-otp"]
+            },
+            "description": "Saves JWT into {{auth_token}}. BISWARUP should see TWO products: star_steller (TE) + star_sfa (Employee) — real cross-product identity from legacy data."
+          }
+        },
+        {
+          "name": "Verify OTP - PRIYABRATA (token -> auth_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.status === true) {",
+                  "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
+                  "    console.log('Token saved to auth_token. Allowed:', JSON.stringify(res.allowed_products));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"9932209994\",\n  \"otp\": \"{{test_otp}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP - KUMAR (token -> auth_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.status === true) {",
+                  "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
+                  "    console.log('Token saved to auth_token. Allowed:', JSON.stringify(res.allowed_products));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"7070894886\",\n  \"otp\": \"{{test_otp}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP - BANKA (token -> auth_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.status === true) {",
+                  "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
+                  "    console.log('Token saved to auth_token. Allowed:', JSON.stringify(res.allowed_products));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"9862216455\",\n  \"otp\": \"{{test_otp}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP - Moinul (token -> auth_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.status === true) {",
+                  "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
+                  "    console.log('Token saved to auth_token. Allowed:', JSON.stringify(res.allowed_products));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"6002041778\",\n  \"otp\": \"{{test_otp}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP - SHYAMAL (token -> auth_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.status === true) {",
+                  "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
+                  "    console.log('Token saved to auth_token. Allowed:', JSON.stringify(res.allowed_products));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"8876382675\",\n  \"otp\": \"{{test_otp}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "verify-otp"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Launch Star SFA (XML)",
+      "description": "Returns text/xml identical to legacy emplogin-check-6.0.1.php success output. Run 'Verify OTP' for the desired user right before launching.",
+      "item": [
+        {
+          "name": "Launch Star SFA - KUMAR NISHANT (Employee)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('Star SFA Response (XML):');",
+                  "console.log(pm.response.text());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Accept", "value": "text/xml" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_sfa",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "launch", "star_sfa"]
+            },
+            "description": "Expect 200 XML: emp_code E0024-ish, emp_name, sale_access, newpassword, deviceid, acedns — same shape as legacy."
+          }
+        },
+        {
+          "name": "Launch Star SFA - BISWARUP (cross-product TE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Accept", "value": "text/xml" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_sfa",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "launch", "star_sfa"]
+            },
+            "description": "Run 'Verify OTP - BISWARUP' first. Proves one phone existing in BOTH Stellar and SFA gets both products."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Launch Star Saathi (encrypted hex)",
+      "item": [
+        {
+          "name": "Launch Star Saathi - BANKA BEHARI PAUL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('Star Saathi Response (AES-128-CBC hex):');",
+                  "console.log(pm.response.text());",
+                  "console.log('--- Decrypt with: php decrypt-saathi.php <hex> ---');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Accept", "value": "text/plain" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_saathi",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "launch", "star_saathi"]
+            },
+            "description": "Run 'Verify OTP - BANKA' first. Expect encrypted hex. Decrypt with:\nphp decrypt-saathi.php <hex_string>\nDecrypted payload contains real customer_code (C/...), dns_emp_code, belong_dealer_* resolved from rds_tag."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Launch Star Stellar (JSON)",
+      "item": [
+        {
+          "name": "Launch Star Stellar - BISWARUP (TE type)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('Star Stellar Response (JSON):');",
+                  "console.log(JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_steller",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "launch", "star_steller"]
+            },
+            "description": "Run 'Verify OTP - BISWARUP' first. Expect process_status=YES, user_type=TE, the_te_id as STRING (matches legacy mysqli behaviour), te_profile_image URL."
+          }
+        },
+        {
+          "name": "Launch Star Stellar - PRIYABRATA (ENGINEER type)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('Star Stellar Response (JSON):');",
+                  "console.log(JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_steller",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "launch", "star_steller"]
+            },
+            "description": "Run 'Verify OTP - PRIYABRATA' first. Expect user_type=ENGINEER with e_name/e_mobile/te_code/e_dob/e_address etc."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Launch Star Link (JSON)",
+      "item": [
+        {
+          "name": "Launch Star Link - Moinul (Mason, GOLD)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('Star Link Response (JSON):');",
+                  "console.log(JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_link",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "launch", "star_link"]
+            },
+            "description": "Run 'Verify OTP - Moinul' first. Expect: role=2 role_name=Contractor, points=4074 -> mason_category=GOLD (computed from points range), te object (parent TE), dealers array (113 linked dealers)."
+          }
+        },
+        {
+          "name": "Launch Star Link - SHYAMAL (BDE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_link",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "launch", "star_link"]
+            },
+            "description": "Run 'Verify OTP - SHYAMAL' first. Expect role=1 role_name=BDE with emp_code."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Error Scenarios",
+      "item": [
+        {
+          "name": "Send OTP - Non-existent user (expect 404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"0000000000\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "send-otp"]
+            },
+            "description": "Expect 404 {\"status\":false,\"message\":\"User not found\"}. Same result for real phones that were FILTERED OUT during sync (acedns='N' employees/customers, INACTIVE engineers, dirty numbers)."
+          }
+        },
+        {
+          "name": "Send OTP - Missing mobile_number (expect 422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "send-otp"]
+            },
+            "description": "Expect 422 Laravel validation error"
+          }
+        },
+        {
+          "name": "Verify OTP - Wrong code (expect 401 INVALID_OTP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"9239674825\",\n  \"otp\": \"000000\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "verify-otp"]
+            },
+            "description": "Run 'Send OTP - BISWARUP' first. Expect 401 with code=INVALID_OTP. After 3 bad attempts: MAX_ATTEMPTS_EXCEEDED. NOTE: each verify consumes the OTP — re-run send-otp before retrying."
+          }
+        },
+        {
+          "name": "Launch - Invalid product key (expect 404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/invalid_product",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "launch", "invalid_product"]
+            },
+            "description": "Expect 404 {\"status\":false,\"message\":\"Invalid product key\"}. NOTE: requires a fresh {{auth_token}} — run Verify OTP first, otherwise you get 401 Unauthenticated."
+          }
+        },
+        {
+          "name": "Launch - Invalid token (expect 401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer invalid_token_here" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_link",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sso", "launch", "star_link"]
+            },
+            "description": "Expect 401 {\"message\":\"Unauthenticated.\"}"
+          }
+        }
+      ]
+    }
+  ]
+}

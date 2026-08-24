@@ -74,12 +74,42 @@ class SsoTestDataSeeder extends Seeder
                     'role_name' => $userData['role'],
                 ]);
 
-                // Generate contextual legacy metadata for each specific app
                 $attributes = match($productSlug) {
-                    'star_saathi' => ['customer_code' => 'CUST_' . $user->id, 'sale_access' => 'PRIMARY', 'deviceid' => 'DEV_' . $user->id],
-                    'star_sfa' => ['sale_access' => 'ALL', 'deviceid' => 'DEV_' . $user->id],
-                    'star_link' => ['role' => 2, 'role_name' => $userData['role'], 'city' => 'Kolkata'],
-                    'star_steller' => ['user_type' => strtoupper($userData['role']), 'the_engineer_id' => 'TE_' . $user->id, 'e_address' => 'Site A', 'e_pin' => '700001'],
+                    'star_saathi' => [
+                        'customer_code' => 'CUST_' . $user->id,
+                        'dns_emp_code' => 'DNS_' . $user->id,
+                        'emp_name' => $user->name,
+                        'sale_access' => 'PRIMARY',
+                        'deviceid' => 'DEV_' . $user->id,
+                        'user_type' => 'dealer',
+                    ],
+                    'star_sfa' => [
+                        'emp_code' => $user->emp_code,
+                        'emp_name' => $user->name,
+                        'sale_access' => 'Primary',
+                        'newpassword' => '1234',
+                        'deviceid' => 'DEV_' . $user->id,
+                        'acedns' => 'Y',
+                    ],
+                    'star_link' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'phone' => $user->mobile_number,
+                        'role' => $userData['role'] === 'BDE' ? 1 : 2,
+                        'role_name' => $userData['role'],
+                        'city' => 'Kolkata',
+                    ],
+                    'star_steller' => [
+                        'user_type' => $userData['role'] === 'BDE' ? 'TE' : 'ENGINEER',
+                        'the_te_id' => 'TE_' . $user->id,
+                        'the_te_name' => $user->name,
+                        'the_te_code' => $user->emp_code,
+                        'the_engineer_id' => 'EN_' . $user->id,
+                        'e_name' => $user->name,
+                        'e_mobile' => $user->mobile_number,
+                        'e_address' => 'Site A, Kolkata',
+                        'e_pin' => '700001',
+                    ],
                 };
 
                 UserProductMetadata::create([

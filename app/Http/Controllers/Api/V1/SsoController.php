@@ -6,13 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\UserProductMetadata;
+use App\Services\OtpService;
+use App\Services\SmsService;
 use App\Services\Sso\AdapterFactory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class SsoController extends Controller
 {
+    protected OtpService $otpService;
+    protected SmsService $smsService;
+
+    public function __construct(OtpService $otpService, SmsService $smsService)
+    {
+        $this->otpService = $otpService;
+        $this->smsService = $smsService;
+    }
+
     // Step 1: Send Central OTP
     public function sendOtp(Request $request)
     {
@@ -23,10 +33,12 @@ class SsoController extends Controller
             return response()->json(['status' => false, 'message' => 'User not found'], 404);
         }
 
-        $otp = rand(100000, 999999);
-        Cache::put("sso_otp:{$user->mobile_number}", $otp, 300); // 5 min expiration
+        if (!$user->status) {
+            return response()->json(['status' => false, 'message' => 'User account is inactive. Please contact administrator.'], 403);
+        }
 
-        // Integrate SMS Gateway Call Here
+        $otp = $this->otpService->generateOtp($user->mobile_number);
+        $this->smsService->sendOtp($user->mobile_number, $otp);
 
         return response()->json(['status' => true, 'message' => 'OTP sent successfully']);
     }
@@ -39,12 +51,14 @@ class SsoController extends Controller
             'otp' => 'required|string'
         ]);
 
-        $cachedOtp = Cache::get("sso_otp:{$request->mobile_number}");
-        if (!$cachedOtp || $cachedOtp != $request->otp) {
-            return response()->json(['status' => false, 'message' => 'Invalid or expired OTP'], 401);
+        $verification = $this->otpService->validateOtp($request->mobile_number, $request->otp);
+        if (!$verification['status']) {
+            return response()->json([
+                'status' => false,
+                'message' => $verification['message'] ?? 'Invalid or expired OTP',
+                'code' => $verification['code'] ?? 'INVALID_OTP'
+            ], 401);
         }
-
-        Cache::forget("sso_otp:{$request->mobile_number}");
 
         $user = User::with('productAccess.product')->where('mobile_number', $request->mobile_number)->first();
         $token = JWTAuth::fromUser($user);
@@ -55,7 +69,7 @@ class SsoController extends Controller
                 'name' => $access->product->name,
                 'role' => $access->role_name
             ];
-        });
+        })->values();
 
         return response()->json([
             'status' => true,
@@ -63,7 +77,8 @@ class SsoController extends Controller
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
-                'mobile' => $user->mobile_number
+                'mobile' => $user->mobile_number,
+                'emp_code' => $user->emp_code
             ],
             'allowed_products' => $allowedProducts
         ]);
