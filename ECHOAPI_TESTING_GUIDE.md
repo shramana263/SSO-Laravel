@@ -52,11 +52,11 @@ This guide provides complete endpoint configurations, request/response payloads,
 ```json
 {
   "mobile_number": "9000000004",
-  "otp": "123456"
+  "otp": "<latest-code>"
 }
 ```
 
-> **Note**: In testing environment, OTP is always `123456` (configured in `OtpService`)
+> **Note**: OTPs are always dynamically generated (4-digit, same algorithm as the legacy apps). In local/testing the SMS is not sent - instead the full SMS body containing the code is written to `storage/logs/laravel.log` (search for `[SSO SMS]`). Each OTP works once; send a new one before retrying verify.
 
 #### Success Response (200) - Multi-Product User (Priya BDE)
 ```json
@@ -410,7 +410,7 @@ Create an EchoAPI environment with:
 | Variable | Value |
 |----------|-------|
 | `base_url` | `http://localhost:8000/api` |
-| `test_otp` | `123456` |
+| `test_otp` | *(paste latest code from `storage/logs/laravel.log` after each Send OTP)* |
 
 ### Request Chain (Run in Order)
 
@@ -492,10 +492,10 @@ curl -X POST http://localhost:8000/api/v1/sso/send-otp \
   -H "Content-Type: application/json" \
   -d '{"mobile_number": "9000000004"}'
 
-# 2. Verify OTP (save token)
+# 2. Verify OTP (grab the 4-digit code from storage/logs/laravel.log, then save token)
 curl -X POST http://localhost:8000/api/v1/sso/verify-otp \
   -H "Content-Type: application/json" \
-  -d '{"mobile_number": "9000000004", "otp": "123456"}'
+  -d '{"mobile_number": "9000000004", "otp": "<latest-code>"}'
 
 # 3. Launch Star SFA (XML response)
 curl -X POST http://localhost:8000/api/v1/sso/launch/star_sfa \
@@ -531,7 +531,7 @@ This creates 5 test users with the access matrix shown above.
 
 ## Notes for Team
 
-1. **OTP in Testing**: Always `123456` - check `OtpService` for production configuration
+1. **OTP**: Always dynamically generated (4-digit, legacy algorithm). In local/testing, read it from `storage/logs/laravel.log` (`[SSO SMS]` entries) - no static codes exist anywhere
 2. **Star Saathi Encryption**: Response is encrypted hex string. Use adapter's `decrypt()` method to verify payload
 3. **Star SFA Response**: Returns XML, not JSON - set `Accept: text/xml` header
 4. **Authorization Middleware**: `EnsureProductAccess` checks if user has access to requested product

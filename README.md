@@ -219,7 +219,7 @@ curl -X POST http://localhost:8000/api/auth/request-otp \
 ```bash
 curl -X POST http://localhost:8000/api/auth/verify-otp \
   -H "Content-Type: application/json" \
-  -d '{"mobile_number": "+919876543210", "otp_code": "123456"}'
+  -d '{"mobile_number": "+919876543210", "otp_code": "<code-from-log>"}'
 ```
 
 **Success Response (200):**
@@ -429,12 +429,12 @@ php artisan test tests/Feature/AuthTest.php
 
 ### Demo Credentials (Seeded)
 
-| User | Mobile | OTP (local) | Role |
-|------|--------|-------------|------|
-| Global Admin | +919876543210 | 123456 | global_admin |
-| Product 1 User | +919123456789 | 123456 | product_1_user |
+| User | Mobile | Role |
+|------|--------|------|
+| Global Admin | +919876543210 | global_admin |
+| Product 1 User | +919123456789 | product_1_user |
 
-> **Note**: In `local`/`testing` environments, OTP is always `123456` (see `OtpService::generateOtp()`).
+> **Note**: OTPs are always dynamically generated (4-digit legacy algorithm) — no static codes exist in any environment. In `local`/`testing`, the SMS body with the code is logged to `storage/logs/laravel.log` instead of being sent (see `OtpService::generateOtp()`).
 
 ---
 

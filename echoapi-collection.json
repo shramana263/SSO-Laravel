@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
     "name": "SSO Laravel API",
-    "description": "EchoAPI test collection for the SSO Laravel API — now running against REAL production user data synced from legacy product databases.\n\n## How To Use\n1. Run a **Send OTP** request\n2. Immediately run the matching **Verify OTP** request — it automatically saves the JWT into `{{auth_token}}`\n3. Run any **Launch Product** request (uses the last verified user's token)\n4. To switch users, re-run Send OTP + Verify OTP for that user, then Launch\n\n## Real Test Users (synced from legacy prod DBs)\n| Mobile | Name | Source | Products |\n|---|---|---|---|\n| 9239674825 | BISWARUP NASKAR | Stellar te_master (acedns=Y) | star_steller (TE) + star_sfa (Employee) — cross-product proof |\n| 9932209994 | PRIYABRATA ROY | Stellar engineer_master (ACTIVE) | star_steller (Site Engineer) |\n| 7070894886 | KUMAR NISHANT | SFA employee_master (acedns=Y) | star_sfa (Employee) |\n| 9862216455 | BANKA BEHARI PAUL | Saathi customer_master (acedns=Y) | star_saathi (dealer) |\n| 6002041778 | Moinul hoque | Link users (role=2 Mason, GOLD cat., 113 dealers) | star_link (Contractor) |\n| 8876382675 | SHYAMAL DAS | Link users (role=1 BDE) | star_link (BDE) |\n\nOTP is always **123456** in local environment.\n\nAny phone NOT in the central DB (e.g. filtered out during sync: acedns='N', INACTIVE engineers, dirty numbers, Link roles other than BDE/Mason) returns `404 User not found` on send-otp — this is correct central behaviour.",
+    "description": "EchoAPI test collection for the SSO Laravel API — now running against REAL production user data synced from legacy product databases.\n\n## How To Use\n1. Run a **Send OTP** request\n2. Immediately run the matching **Verify OTP** request — it automatically saves the JWT into `{{auth_token}}`\n3. Run any **Launch Product** request (uses the last verified user's token)\n4. To switch users, re-run Send OTP + Verify OTP for that user, then Launch\n\n## Real Test Users (synced from legacy prod DBs)\n| Mobile | Name | Source | Products |\n|---|---|---|---|\n| 9239674825 | BISWARUP NASKAR | Stellar te_master (acedns=Y) | star_steller (TE) + star_sfa (Employee) — cross-product proof |\n| 9932209994 | PRIYABRATA ROY | Stellar engineer_master (ACTIVE) | star_steller (Site Engineer) |\n| 7070894886 | KUMAR NISHANT | SFA employee_master (acedns=Y) | star_sfa (Employee) |\n| 9862216455 | BANKA BEHARI PAUL | Saathi customer_master (acedns=Y) | star_saathi (dealer) |\n| 6002041778 | Moinul hoque | Link users (role=2 Mason, GOLD cat., 113 dealers) | star_link (Contractor) |\n| 8876382675 | SHYAMAL DAS | Link users (role=1 BDE) | star_link (BDE) |\n\nOTPs are **dynamically generated** (4-digit, same algorithm as legacy apps) in every environment - there are no static codes. In local/testing the SMS is only logged: after each **Send OTP**, grab the code from `storage/logs/laravel.log` (search `[SSO SMS]`) and paste it into the `test_otp` collection variable before running Verify OTP. Each OTP works once.\n\nAny phone NOT in the central DB (e.g. filtered out during sync: acedns='N', INACTIVE engineers, dirty numbers, Link roles other than BDE/Mason) returns `404 User not found` on send-otp — this is correct central behaviour.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -12,7 +12,7 @@
     },
     {
       "key": "test_otp",
-      "value": "123456"
+      "value": ""
     },
     {
       "key": "auth_token",

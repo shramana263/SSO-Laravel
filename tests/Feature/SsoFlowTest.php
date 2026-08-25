@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Product;
+use App\Models\Otp;
 use App\Models\UserProductAccess;
 use App\Models\UserProductMetadata;
 use App\Services\Sso\Adapters\StarSaathiAdapter;
@@ -114,12 +115,13 @@ class SsoFlowTest extends TestCase
 
     public function test_verify_otp_returns_session_token_and_allowed_products()
     {
-        // Request OTP (generates 123456 in testing environment)
+        // OTPs are always dynamically generated; fetch the fresh code from DB
         $this->postJson('/api/v1/sso/send-otp', ['mobile_number' => '9876543210']);
+        $otp = Otp::where('mobile_number', '9876543210')->latest()->first()->otp_code;
 
         $response = $this->postJson('/api/v1/sso/verify-otp', [
             'mobile_number' => '9876543210',
-            'otp' => '123456'
+            'otp' => $otp
         ]);
 
         $response->assertStatus(200)
@@ -138,10 +140,11 @@ class SsoFlowTest extends TestCase
     public function test_verify_otp_for_single_product_user()
     {
         $this->postJson('/api/v1/sso/send-otp', ['mobile_number' => '9123456789']);
+        $otp = Otp::where('mobile_number', '9123456789')->latest()->first()->otp_code;
 
         $response = $this->postJson('/api/v1/sso/verify-otp', [
             'mobile_number' => '9123456789',
-            'otp' => '123456'
+            'otp' => $otp
         ]);
 
         $response->assertStatus(200);

@@ -13,8 +13,10 @@ class OtpService
      *
      * Dynamic codes are 4 digits, ported from StarLink's generateNumericOTP(4)
      * (charset "1357902468"). StarStellar uses rand(1,9).rand(0,9).rand(0,9).rand(1,9),
-     * which differs only in edge-digit distribution. Local/testing keeps the
-     * fixed 123456 code so automated API testing stays predictable.
+     * which differs only in edge-digit distribution. No static/hardcoded OTPs
+     * exist anywhere: every environment generates a fresh random code per send,
+     * and in local/testing the SMS body (containing the code) is written to
+     * storage/logs/laravel.log instead of being sent through the gateway.
      */
     public function generateOtp(string $mobileNumber, ?int $expiryMinutes = null): string
     {
@@ -23,9 +25,7 @@ class OtpService
             ->where('is_used', false)
             ->update(['is_used' => true]);
 
-        $code = app()->environment('local', 'testing')
-            ? '123456'
-            : $this->generateNumericOtp();
+        $code = $this->generateNumericOtp();
 
         // Legacy parity: no expiry by default - valid until used or replaced.
         Otp::create([
