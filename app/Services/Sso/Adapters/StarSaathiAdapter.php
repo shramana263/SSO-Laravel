@@ -12,8 +12,30 @@ class StarSaathiAdapter implements ProductAdapterInterface
     private const ENCRYPTION_IV = 'fedcba9876543210';   // 16 bytes = 128 bits
     private const ENCRYPTION_CIPHER = 'AES-128-CBC';
 
+    /**
+     * cust_type values (lowercase) that are "Ship to Party" aliases.
+     * Users with these roles already have a primary Dealer/Sub-dealer entry;
+     * they must be logged in under that primary role, NOT as Ship to Party.
+     */
+    private const SHIP_TO_PARTY_DEALER_NEEDLES    = ['ship to party-dealer',  'shiptoparty-dealer'];
+    private const SHIP_TO_PARTY_SUBDEALER_NEEDLES = ['ship to party-subdeale', 'shiptoparty-subdeale'];
+
+    /** Canonical role strings we accept as "Dealer" when doing the lookup. */
+    private const DEALER_TYPE_NEEDLES    = ['dealer'];
+
+    /** Canonical role strings we accept as "Sub-dealer" when doing the lookup. */
+    private const SUBDEALER_TYPE_NEEDLES = ['subdealer', 'sub-dealer', 'rssd'];
+
     public function formatResponse(User $user, array $attributes): Response
     {
+        // ---------------------------------------------------------------
+        // Ship-to-Party bypass
+        // A customer whose cust_type is "Ship to Party-dealer" or
+        // "ShiptoParty-Subdealer" already has a primary Dealer/Sub-dealer
+        // entry in user_product_metadata.  Log them in under that role
+        // instead so they never receive a Ship-to-Party session token.
+        // ---------------------------------------------------------------
+        $attributes = $this->resolveAttributes($user, $attributes);
         $custCode = $attributes['customer_code'] ?? ($attributes['emp_code'] ?? ($user->emp_code ?? ''));
         $dnsCustCode = $attributes['dns_emp_code'] ?? ($attributes['dns_customer_code'] ?? $custCode);
 
@@ -49,6 +71,94 @@ class StarSaathiAdapter implements ProductAdapterInterface
 
         return response($encryptedData, 200)->header('Content-Type', 'text/plain; charset=utf-8');
     }
+
+    // ===================================================================
+    // Ship-to-Party role resolution
+    // ===================================================================
+
+    /**
+     * If $attributes describes a Ship-to-Party role, find the user's
+     * primary Dealer or Sub-dealer metadata entry for star_saathi and
+     * return that instead.  All other roles pass through unchanged.
+     *
+     * @param  User  $user
+     * @param  array $attributes  Raw attributes from user_product_metadata
+     * @return array              Resolved attributes (may be the same array)
+     */
+    private function resolveAttributes(User $user, array $attributes): array
+    {
+        $custType = strtolower(trim(
+            $attributes['user_type'] ?? $attributes['cust_type'] ?? ''
+        ));
+
+        // Determine whether we need to redirect
+        $isShipToPartyDealer    = $this->matchesAny($custType, self::SHIP_TO_PARTY_DEALER_NEEDLES);
+        $isShipToPartySubdealer = $this->matchesAny($custType, self::SHIP_TO_PARTY_SUBDEALER_NEEDLES);
+
+        if (!$isShipToPartyDealer && !$isShipToPartySubdealer) {
+            return $attributes; // Normal role — nothing to do
+        }
+
+        // Find the star_saathi product record
+        $product = \App\Models\Product::where('slug', 'star_saathi')->first();
+        if (!$product) {
+            return $attributes; // Safety fallback: product not configured
+        }
+
+        // Fetch ALL metadata rows for this user + product
+        // (one row per role when a customer has multiple roles)
+        $allMeta = \App\Models\UserProductMetadata::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->get();
+
+        foreach ($allMeta as $meta) {
+            $metaAttrs = $meta->attributes ?? [];
+            $metaType  = strtolower(trim(
+                $metaAttrs['user_type'] ?? $metaAttrs['cust_type'] ?? ''
+            ));
+
+            // Never redirect to another Ship-to-Party entry
+            if (
+                $this->matchesAny($metaType, self::SHIP_TO_PARTY_DEALER_NEEDLES) ||
+                $this->matchesAny($metaType, self::SHIP_TO_PARTY_SUBDEALER_NEEDLES)
+            ) {
+                continue;
+            }
+
+            // Both Ship-to-Party types: prefer Dealer, then fall back to Sub-dealer / RSSD.
+            // We collect candidates and return the best match after the loop.
+            if ($this->matchesAny($metaType, self::DEALER_TYPE_NEEDLES)) {
+                return $metaAttrs; // Dealer found — best match, return immediately
+            }
+
+            if ($this->matchesAny($metaType, self::SUBDEALER_TYPE_NEEDLES)) {
+                return $metaAttrs; // Sub-dealer / RSSD found — good fallback
+            }
+        }
+
+        // No alternate entry found — graceful fallback: return original attributes
+        // (the client will still get a response, just with the ship-to-party role)
+        return $attributes;
+    }
+
+    /**
+     * Returns true if $haystack contains any of the $needles as a substring.
+     * Case-insensitive comparison is already guaranteed because both sides
+     * are lowercased before being passed here.
+     */
+    private function matchesAny(string $haystack, array $needles): bool
+    {
+        foreach ($needles as $needle) {
+            if (str_contains($haystack, $needle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ===================================================================
+    // Legacy AES-128-CBC encryption (must match StarSaathi mcrypt output)
+    // ===================================================================
 
     /**
      * Encrypt data using StarSaathi's legacy encryption (AES-128-CBC)

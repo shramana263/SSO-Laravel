@@ -146,6 +146,25 @@ class SyncLegacyUsers extends Command
 
     // ----------------------------------------------------------------- Saathi
 
+    /**
+     * cust_type substrings (lowercase) that identify Ship-to-Party aliases.
+     * These customers already have a primary Dealer/Sub-dealer entry in
+     * customer_master.  We skip them entirely so the primary entry is the
+     * only one that lands in user_product_access / user_product_metadata.
+     */
+    private const SAATHI_SHIP_TO_PARTY = ['ship to party', 'shiptoparty'];
+
+    private function isShipToParty(string $custType): bool
+    {
+        $lower = strtolower(trim($custType));
+        foreach (self::SAATHI_SHIP_TO_PARTY as $needle) {
+            if (str_contains($lower, $needle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private function syncSaathi(object $product): void
     {
         $src = $this->source('src_saathi');
@@ -164,15 +183,27 @@ class SyncLegacyUsers extends Command
             return [$code, $dealerLookup[$code][0], $dealerLookup[$code][1]];
         };
 
+        // Order by cust_type so that Dealer/Sub-dealer rows are processed BEFORE
+        // any Ship-to-Party rows.  If both share a phone number, the primary role
+        // is written first and the Ship-to-Party row is skipped entirely.
         $rows = $src->table('customer_master')
             ->whereRaw("UPPER(acedns) = 'Y'")
             ->select('customer_id', 'customer_code', 'dns_customer_code', 'customer_name', 'phone_no', 'email', 'cust_type', 'rds_tag', 'state_code', 'sms_otp')
+            ->orderByRaw("CASE WHEN LOWER(cust_type) LIKE '%ship to party%' OR LOWER(cust_type) LIKE '%shiptoparty%' THEN 1 ELSE 0 END ASC")
             ->cursor();
 
         foreach ($rows as $cust) {
             $phone = $this->normalizePhone($cust->phone_no);
             if (!$phone) {
                 $this->bump('skipped_phone');
+                continue;
+            }
+
+            // STRICT RULE: Ship-to-Party roles must NEVER get their own SSO entry.
+            // They always have a corresponding Dealer/Sub-dealer row that will
+            // (or has already) been processed for the same phone number.
+            if ($this->isShipToParty($cust->cust_type ?? '')) {
+                $this->bump('skipped_ship_to_party');
                 continue;
             }
 
@@ -202,7 +233,11 @@ class SyncLegacyUsers extends Command
             ];
 
             $userId = $this->ensureUser($phone, $cust->customer_name ?? '', $cust->email ?: null);
-            $this->ensureAccessAndMeta($userId, $product->id, strtolower($cust->cust_type ?: 'dealer'), $attributes);
+
+            // Pass overwrite=true so that if a stale Ship-to-Party row somehow
+            // exists for this user+product (from a previous sync run), the dealer
+            // row replaces it immediately.
+            $this->ensureAccessAndMeta($userId, $product->id, strtolower($cust->cust_type ?: 'dealer'), $attributes, overwriteExisting: true);
         }
     }
 
@@ -336,22 +371,24 @@ class SyncLegacyUsers extends Command
         return $id;
     }
 
-    private function ensureAccessAndMeta(int $userId, int $productId, string $roleName, array $attributes): void
+    private function ensureAccessAndMeta(int $userId, int $productId, string $roleName, array $attributes, bool $overwriteExisting = false): void
     {
         $key = "{$userId}:{$productId}";
 
         if (!isset($this->accessSet[$key])) {
             $now = now();
             DB::table('user_product_access')->insert([
-                'user_id' => $userId,
+                'user_id'    => $userId,
                 'product_id' => $productId,
-                'role_name' => mb_substr($roleName, 0, 100),
+                'role_name'  => mb_substr($roleName, 0, 100),
                 'is_primary' => false,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
             $this->accessSet[$key] = true;
         } else {
+            // Always update the role_name — this allows a dealer row processed
+            // after a stale ship-to-party row to overwrite the wrong role.
             DB::table('user_product_access')
                 ->where('user_id', $userId)->where('product_id', $productId)
                 ->update(['role_name' => mb_substr($roleName, 0, 100)]);
@@ -360,15 +397,16 @@ class SyncLegacyUsers extends Command
         if (!isset($this->metaSet[$key])) {
             $now = now();
             DB::table('user_product_metadata')->insert([
-                'user_id' => $userId,
+                'user_id'    => $userId,
                 'product_id' => $productId,
                 'attributes' => json_encode($attributes),
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
             $this->metaSet[$key] = true;
-        } elseif ($this->option('refresh')) {
-            // Shared phones keep the FIRST synced identity unless explicitly refreshed
+        } elseif ($overwriteExisting || $this->option('refresh')) {
+            // $overwriteExisting: dealer row replacing a previously-written ship-to-party row.
+            // --refresh flag: full re-sync requested by the operator.
             DB::table('user_product_metadata')
                 ->where('user_id', $userId)->where('product_id', $productId)
                 ->update(['attributes' => json_encode($attributes)]);
