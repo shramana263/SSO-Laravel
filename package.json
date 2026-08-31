@@ -7,10 +7,14 @@
         "dev": "vite"
     },
     "devDependencies": {
+        "@ngrok/ngrok": "^1.7.0",
         "@tailwindcss/vite": "^4.0.0",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^3.1",
         "tailwindcss": "^4.0.0",
         "vite": "^8.0.0"
+    },
+    "dependencies": {
+        "localtunnel": "^2.0.2"
     }
 }

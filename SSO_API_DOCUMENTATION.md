@@ -43,9 +43,11 @@ Accept: application/json
 ```json
 {
   "status": true,
-  "message": "OTP sent successfully"
+  "message": "OTP sent successfully",
+  "debug_otp": "7705"
 }
 ```
+> **Note for Frontend Devs:** In local/debug mode, `debug_otp` is automatically returned in the response so you can test OTP verification seamlessly without needing server log access.
 
 #### Error Responses
 - **404 Not Found (User not registered or no products)**

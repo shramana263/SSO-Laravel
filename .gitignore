@@ -26,3 +26,4 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /product-db-structures
+/package-lock.json

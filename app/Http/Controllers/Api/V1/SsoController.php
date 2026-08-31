@@ -40,7 +40,12 @@ class SsoController extends Controller
         $otp = $this->otpService->generateOtp($user->mobile_number);
         $this->smsService->sendOtp($user->mobile_number, $otp);
 
-        return response()->json(['status' => true, 'message' => 'OTP sent successfully']);
+        $response = ['status' => true, 'message' => 'OTP sent successfully'];
+        if (config('app.debug')) {
+            $response['debug_otp'] = $otp;
+        }
+
+        return response()->json($response);
     }
 
     // Step 2: Verify OTP & Return Accessible Products
