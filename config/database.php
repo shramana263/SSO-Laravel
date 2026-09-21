@@ -84,6 +84,58 @@ return [
             ]) : [],
         ],
 
+        'src_sfa' => [
+            'driver' => env('DB_SFA_DRIVER', env('DB_CONNECTION', 'mariadb')),
+            'host' => env('DB_SFA_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_SFA_PORT', env('DB_PORT', '3306')),
+            'database' => env('DB_SFA_DATABASE', 'src_sfa'),
+            'username' => env('DB_SFA_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('DB_SFA_PASSWORD', env('DB_PASSWORD', '')),
+            'charset' => env('DB_SFA_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_SFA_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'strict' => false,
+        ],
+
+        'src_saathi' => [
+            'driver' => env('DB_SAATHI_DRIVER', env('DB_CONNECTION', 'mariadb')),
+            'host' => env('DB_SAATHI_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_SAATHI_PORT', env('DB_PORT', '3306')),
+            'database' => env('DB_SAATHI_DATABASE', 'src_saathi'),
+            'username' => env('DB_SAATHI_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('DB_SAATHI_PASSWORD', env('DB_PASSWORD', '')),
+            'charset' => env('DB_SAATHI_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_SAATHI_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'strict' => false,
+        ],
+
+        'src_stellar' => [
+            'driver' => env('DB_STELLAR_DRIVER', env('DB_CONNECTION', 'mariadb')),
+            'host' => env('DB_STELLAR_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_STELLAR_PORT', env('DB_PORT', '3306')),
+            'database' => env('DB_STELLAR_DATABASE', 'src_stellar'),
+            'username' => env('DB_STELLAR_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('DB_STELLAR_PASSWORD', env('DB_PASSWORD', '')),
+            'charset' => env('DB_STELLAR_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_STELLAR_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'strict' => false,
+        ],
+
+        'src_link' => [
+            'driver' => env('DB_LINK_DRIVER', env('DB_CONNECTION', 'mariadb')),
+            'host' => env('DB_LINK_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_LINK_PORT', env('DB_PORT', '3306')),
+            'database' => env('DB_LINK_DATABASE', 'src_link'),
+            'username' => env('DB_LINK_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('DB_LINK_PASSWORD', env('DB_PASSWORD', '')),
+            'charset' => env('DB_LINK_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_LINK_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'strict' => false,
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),

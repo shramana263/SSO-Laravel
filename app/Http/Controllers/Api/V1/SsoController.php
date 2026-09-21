@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Product;
-use App\Models\UserProductMetadata;
 use App\Services\OtpService;
 use App\Services\SmsService;
 use App\Services\Sso\AdapterFactory;
@@ -148,39 +147,8 @@ class SsoController extends Controller
         $user    = auth('api')->user();
         $product = Product::where('slug', $productKey)->where('is_active', true)->firstOrFail();
 
-        // Retrieve legacy attributes for this specific panel.
-        // When a user has multiple metadata rows for the same product (e.g. a
-        // Ship-to-Party row AND a Dealer row) prefer the non-Ship-to-Party one
-        // so the adapter always receives the primary role's attributes.
-        $allMeta = UserProductMetadata::where('user_id', $user->id)
-            ->where('product_id', $product->id)
-            ->get();
-
-        $metadata = null;
-
-        // First pass: pick a non-Ship-to-Party row
-        foreach ($allMeta as $meta) {
-            $metaType = strtolower(trim(
-                ($meta->attributes['user_type'] ?? $meta->attributes['cust_type'] ?? '')
-            ));
-            $isShipToParty = str_contains($metaType, 'ship to party') ||
-                             str_contains($metaType, 'shiptoparty');
-            if (!$isShipToParty) {
-                $metadata = $meta;
-                break;
-            }
-        }
-
-        // Fallback: if only Ship-to-Party rows exist, use the first one
-        // (StarSaathiAdapter::resolveAttributes() will attempt a redirect anyway)
-        if ($metadata === null) {
-            $metadata = $allMeta->first();
-        }
-
-        $attributes = $metadata ? $metadata->attributes : [];
-
-        // Delegate response formatting to the corresponding adapter
+        // Delegate response formatting directly to the corresponding adapter (queries product DB dynamically)
         $adapter = AdapterFactory::make($productKey);
-        return $adapter->formatResponse($user, $attributes);
+        return $adapter->formatResponse($user);
     }
 }

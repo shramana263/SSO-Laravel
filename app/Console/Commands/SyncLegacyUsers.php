@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class SyncLegacyUsers extends Command
 {
-    protected $signature = 'sso:sync-legacy {--product=* : star_steller, star_sfa, star_saathi, star_link} {--refresh : Overwrite metadata for already-synced users}';
+    protected $signature = 'sso:sync-legacy {--product=* : star_steller, star_sfa, star_saathi, star_link} {--refresh : Overwrite metadata for already-synced users} {--with-meta : Also populate central user_product_metadata table}';
 
     protected $description = 'Sync legacy product users from staging source DBs into the SSO database';
 
@@ -239,6 +239,47 @@ class SyncLegacyUsers extends Command
             // row replaces it immediately.
             $this->ensureAccessAndMeta($userId, $product->id, strtolower($cust->cust_type ?: 'dealer'), $attributes, overwriteExisting: true);
         }
+
+        // 2. Sync Brokers from broker_master
+        if ($src->getSchemaBuilder()->hasTable('broker_master')) {
+            $brokers = $src->table('broker_master')
+                ->whereRaw("UPPER(acedns) = 'Y'")
+                ->cursor();
+
+            foreach ($brokers as $broker) {
+                $phone = $this->normalizePhone($broker->phone_no ?? null);
+                if (!$phone) {
+                    $this->bump('skipped_phone');
+                    continue;
+                }
+
+                $attributes = [
+                    'user_type' => 'broker',
+                    'emp_code' => (string) ($broker->dns_broker_id ?: $broker->broker_id),
+                    'customer_code' => '',
+                    'dns_emp_code' => (string) ($broker->dns_broker_id ?: $broker->broker_id),
+                    'emp_name' => $broker->broker_name ?? '',
+                    'sale_access' => 'PRIMARY',
+                    'newpassword' => '',
+                    'deviceid' => '',
+                    'phonenumber' => $phone,
+                    'acedns' => $broker->acedns ?? 'Y',
+                    'broker_id' => (string) ($broker->broker_id ?? ''),
+                    'dns_broker_id' => (string) ($broker->dns_broker_id ?? ''),
+                    'contact_person' => (string) ($broker->contact_person ?? ''),
+                    'mail_id' => $broker->mail_id ?? '',
+                    'brokerage_cost' => (string) ($broker->brokerage_cost ?? ''),
+                    'state_code' => (string) ($broker->state_code ?? ''),
+                    'belong_dealer_code' => '',
+                    'belong_dealer_dns_code' => '',
+                    'belong_dealer_name' => '',
+                    'is_survey_form_submitted' => 'NO',
+                ];
+
+                $userId = $this->ensureUser($phone, $broker->broker_name ?? '', $broker->mail_id ?: null);
+                $this->ensureAccessAndMeta($userId, $product->id, 'broker', $attributes);
+            }
+        }
     }
 
     // ------------------------------------------------------------------- Link
@@ -394,24 +435,26 @@ class SyncLegacyUsers extends Command
                 ->update(['role_name' => mb_substr($roleName, 0, 100)]);
         }
 
-        if (!isset($this->metaSet[$key])) {
-            $now = now();
-            DB::table('user_product_metadata')->insert([
-                'user_id'    => $userId,
-                'product_id' => $productId,
-                'attributes' => json_encode($attributes),
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
-            $this->metaSet[$key] = true;
-        } elseif ($overwriteExisting || $this->option('refresh')) {
-            // $overwriteExisting: dealer row replacing a previously-written ship-to-party row.
-            // --refresh flag: full re-sync requested by the operator.
-            DB::table('user_product_metadata')
-                ->where('user_id', $userId)->where('product_id', $productId)
-                ->update(['attributes' => json_encode($attributes)]);
-        } else {
-            $this->bump('shared_phone_kept_first');
+        if ($this->option('with-meta')) {
+            if (!isset($this->metaSet[$key])) {
+                $now = now();
+                DB::table('user_product_metadata')->insert([
+                    'user_id'    => $userId,
+                    'product_id' => $productId,
+                    'attributes' => json_encode($attributes),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+                $this->metaSet[$key] = true;
+            } elseif ($overwriteExisting || $this->option('refresh')) {
+                // $overwriteExisting: dealer row replacing a previously-written ship-to-party row.
+                // --refresh flag: full re-sync requested by the operator.
+                DB::table('user_product_metadata')
+                    ->where('user_id', $userId)->where('product_id', $productId)
+                    ->update(['attributes' => json_encode($attributes)]);
+            } else {
+                $this->bump('shared_phone_kept_first');
+            }
         }
 
         $this->bump('processed');

@@ -110,7 +110,7 @@ class SsoFlowTest extends TestCase
         ]);
 
         $response->assertStatus(404)
-                 ->assertJson(['status' => false, 'message' => 'User not found']);
+                 ->assertJson(['status' => false, 'message' => 'User not registered or has no active product access.']);
     }
 
     public function test_verify_otp_returns_session_token_and_allowed_products()

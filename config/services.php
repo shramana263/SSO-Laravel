@@ -42,4 +42,21 @@ return [
         'template_id' => env('SMS_TEMPLATE_ID'),
     ],
 
+    'starsfa' => [
+        'url' => env('STAR_SFA_URL', 'https://starsfa.starcement.co.in'),
+    ],
+
+    'starlink' => [
+        'url' => env('STAR_LINK_URL', 'https://starlinkinfluencers.in'),
+    ],
+
+    'starsaathi' => [
+        'url' => env('STAR_SAATHI_URL', 'https://starsaathi.starcement.co.in'),
+    ],
+
+    'starstellar' => [
+        'url' => env('STAR_STELLAR_URL', 'https://starstellar.com'),
+    ],
+
 ];
+

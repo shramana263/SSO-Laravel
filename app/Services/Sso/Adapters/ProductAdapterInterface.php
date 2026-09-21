@@ -8,5 +8,5 @@ use Illuminate\Http\JsonResponse;
 
 interface ProductAdapterInterface
 {
-    public function formatResponse(User $user, array $attributes): Response|JsonResponse;
+    public function formatResponse(User $user, array $attributes = []): Response|JsonResponse;
 }
