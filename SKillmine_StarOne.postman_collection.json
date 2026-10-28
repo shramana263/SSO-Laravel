@@ -1,0 +1,158 @@
+{
+  "info": {
+    "_postman_id": "d192ae5e-867e-44c5-a5f8-f93b669763b1",
+    "name": "SC StarOne",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "21655652"
+  },
+  "item": [
+    {
+      "name": "Token",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"grant_type\": \"authorization_code\",\r\n    \"client_id\": \"24cf07cb-c990-4780-b77b-f0779e509397\",\r\n    \"client_secret\": \"d0fad5e2-b1e0-4c4c-a820-5963635ff912\",\r\n    \"code\":\"875f14de-af48-4b4e-b609-a1249a3f4413\",\r\n    \"redirect_uri\":\"https://uat-smtcauth.skfin.in/profile/personal-detail\",\r\n    \"scope\": \"openid profile email\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://smtcauth-api.starcement.co.in/token-srv/token",
+          "protocol": "https",
+          "host": [
+            "smtcauth-api",
+            "starcement",
+            "co",
+            "in"
+          ],
+          "path": [
+            "token-srv",
+            "token"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Introspect",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "wdTyToKifeYETTcW6lMelOyJWtVRMt_FshmyY-dyydmYjDPzedfG9aWTjA8Cw8rbRQxUG5xOEALebwGhG-RXjN5TYNynavKXTTpKjw"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\"token\":\"NW0Sp1dmtnSwdTyToKifeYETTcW6lMelOyJWtVRMt_FshmyY-dyydmYjDPzedfG9aWTjA8Cw8rbRQxUG5xOEALebwGhG-RXjN5TYNynavKXTTpKjw\",\n\"token_type_hint\":\"access_token\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://smtcauth-api.starcement.co.in/token-srv/introspect",
+          "protocol": "https",
+          "host": [
+            "smtcauth-api",
+            "starcement",
+            "co",
+            "in"
+          ],
+          "path": [
+            "token-srv",
+            "introspect"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Userinfo",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ0Mzc5ZWE2LWYwOTAtNDcwOS04ODMyLTc0NzM4NjZiMTk5ZCJ9.eyJzdWIiOiIwZTZiM2Q2OC1mNTlhLTQ2ZWYtYTg2NS0wMmI1MTA3ZDJlZjMiLCJpc3ViIjoiIiwiaXNzIjoiaHR0cHM6Ly9zbXRjYXV0aC1hcGkuc3RhcmNlbWVudC5jby5pbiIsImF1ZCI6IjZlZGRjNmVhLTI2YjItNDYyYS05Mzg1LTQ3NjE3NWNlMGVjOSIsImV4cCI6MCwiaWF0IjoxNzkwODQ5MTcxLCJhdXRoX3RpbWUiOjE3OTA4NDkxNzEsImFtciI6WyIwIl0sImFjciI6IjEiLCJqdGkiOiI5MmUxYmU3MS1iNTNmLTRhOTItOTVhMS1mYjc0M2YyNzJlNDUiLCJzY29wZXMiOlsib3BlbmlkIiwicHJvZmlsZSIsInVzZXJfaW5mb19hbGwiXSwic2lkIjoiNjdhYjgwMGMtZjM2Ny00ZTk2LWIyOTctY2IxMWY4YTIyNmY1IiwidWFfaGFzaCI6IjdkZjU4MWNiOTI4MzIwYzZlY2ZiNzMxMzgyMmZmMGIzIiwiY3RyIjoiNTJmMzJhODctOTQyNy00ZjMzLWIzOGUtNDAxMDE1NTg0NGNiIn0.O9hI6nMEbGFu09nLIQm9iCV_0zs3XIJ9uRnyfi4nt61_HdqN7u34Dv08NyXC8L5FDKhrEiKQlX3ZROa-OnYuADLrLfsA_shVsiXAkcxijjcwcCApyzeiZf44B0MCxPGHDpJdhtnxQhf0GtivTMwy16Ax3h8gn6FajlUow9aNb2TBH7kxJNgV9AQHTPrEBssuYOK-Dh141DhQiWAXmnU_HWkialK38uM0klP4SY3VqEEA45M_wHR_xfhJLRvxE_oZt5Gq_2fuM4eWiq83qcbiMcqNiRjjIN1X4HaF-sqWArQXo3F4g6jeiNyXtlAufp6nyG42ykiXSj-ztQkSUcvRQg"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://smtcauth-api.starcement.co.in/users-srv/userinfo",
+          "protocol": "https",
+          "host": [
+            "smtcauth-api",
+            "starcement",
+            "co",
+            "in"
+          ],
+          "path": [
+            "users-srv",
+            "userinfo"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "end_session",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://smtcauth-api.starcement.co.in/token-srv/end_session?access_token_hint=NW0Sp1dmtnSwdTyToKifeYETTcW6lMelOyJWtVRMt_FshmyY-dyydmYjDPzedfG9aWTjA8Cw8rbRQxUG5xOEALebwGhG-RXjN5TYNynavKXTTpKjw",
+          "protocol": "https",
+          "host": [
+            "smtcauth-api",
+            "starcement",
+            "co",
+            "in"
+          ],
+          "path": [
+            "token-srv",
+            "end_session"
+          ],
+          "query": [
+            {
+              "key": "access_token_hint",
+              "value": "NW0Sp1dmtnSwdTyToKifeYETTcW6lMelOyJWtVRMt_FshmyY-dyydmYjDPzedfG9aWTjA8Cw8rbRQxUG5xOEALebwGhG-RXjN5TYNynavKXTTpKjw"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

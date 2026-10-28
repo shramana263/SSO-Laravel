@@ -58,5 +58,13 @@ return [
         'url' => env('STAR_STELLAR_URL', 'https://starstellar.com'),
     ],
 
+    'skillmine' => [
+        'base_url'      => env('SKILLMINE_BASE_URL', 'https://uat-smtcauth-api.starcement.co.in/'),
+        'client_id'     => env('SKILLMINE_CLIENT_ID', '6966a153-057d-4865-819e-d7bb16701f41'),
+        'client_secret' => env('SKILLMINE_CLIENT_SECRET', '94df3fb6-338c-4ac5-a77e-365a6c88aeb8'),
+        'redirect_uri'  => env('SKILLMINE_REDIRECT_URI', 'http://localhost:8000/api/v1/auth/callback'),
+        'manual_mode'   => env('SKILLMINE_MANUAL_MODE', false),
+    ],
+
 ];
 

@@ -1,8 +1,8 @@
 {
   "info": {
-    "_postman_id": "star-sso-collection-v2",
-    "name": "Star One SSO API Collection",
-    "description": "# Star One SSO API Collection\n\nOfficial Single Sign-On (SSO) test collection for Star One frontend team.\n\n## 2-Stage Flow:\n1. **Stage 1: Central Authentication**\n   - `POST /v1/sso/send-otp` -> Sends OTP (debug_otp returned in local environment)\n   - `POST /v1/sso/verify-otp` -> Verifies OTP & returns `star_one_session_token` + `allowed_products`\n2. **Stage 2: Product Launch**\n   - `POST /v1/sso/launch/{product_key}` (Bearer Token) -> Performs live legacy handshake and returns original product app payload.",
+    "_postman_id": "star-one-sso-collection-v3",
+    "name": "Star One SSO API Collection (Skillmine + Legacy Hub)",
+    "description": "# Star One SSO API Collection\n\nComplete Single Sign-On (SSO) test collection for Star One API.\n\n## Structure:\n1. **Skillmine OAuth2 Authentication** (Production flow)\n   - `GET /v1/auth/skillmine/login-url`\n   - `POST /v1/auth/callback` (Auto-saves `auth_token`)\n   - `POST /v1/auth/logout`\n2. **Local Standalone OTP Authentication** (Local mock flow)\n   - `POST /v1/sso/send-otp` (Auto-captures `test_otp`)\n   - `POST /v1/sso/verify-otp` (Auto-saves `auth_token`)\n3. **Product Launch Hand-offs**\n   - `POST /v1/sso/launch/star_saathi`\n   - `POST /v1/sso/launch/star_sfa`\n   - `POST /v1/sso/launch/star_link`\n   - `POST /v1/sso/launch/star_steller`",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -11,546 +11,112 @@
       "value": "http://localhost:8000/api"
     },
     {
-      "key": "test_otp",
-      "value": ""
-    },
-    {
       "key": "auth_token",
       "value": ""
     },
     {
-      "key": "product_key",
-      "value": "star_steller"
+      "key": "test_otp",
+      "value": "1234"
+    },
+    {
+      "key": "test_mobile",
+      "value": "9000000004"
+    },
+    {
+      "key": "skillmine_code",
+      "value": "sample_auth_code_from_skillmine"
     }
   ],
   "item": [
     {
-      "name": "1. Authentication (Stage 1)",
-      "description": "Central Star One OTP Authentication endpoints.",
+      "name": "1. Skillmine OAuth2 Authentication",
       "item": [
         {
-          "name": "1.1 Multi-App User (Stellar + SFA + Link - 8638510331)",
-          "item": [
-            {
-              "name": "Send OTP - Multi-App User",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.debug_otp) {",
-                      "    pm.collectionVariables.set('test_otp', res.debug_otp);",
-                      "    console.log('OTP captured:', res.debug_otp);",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"8638510331\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/send-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "send-otp"]
-                }
-              }
-            },
-            {
-              "name": "Verify OTP - Multi-App User (Saves auth_token)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.status === true && res.star_one_session_token) {",
-                      "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
-                      "    console.log('Saved token to {{auth_token}}');",
-                      "    console.log('Allowed Products:', res.allowed_products);",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"8638510331\",\n  \"otp\": \"{{test_otp}}\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/verify-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "verify-otp"]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "name": "1.2 Star Stellar - Site Engineer (9932209994)",
-          "item": [
-            {
-              "name": "Send OTP - Stellar Site Engineer",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.debug_otp) {",
-                      "    pm.collectionVariables.set('test_otp', res.debug_otp);",
-                      "    console.log('OTP captured:', res.debug_otp);",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"9932209994\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/send-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "send-otp"]
-                }
-              }
-            },
-            {
-              "name": "Verify OTP - Stellar Site Engineer",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.status === true && res.star_one_session_token) {",
-                      "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
-                      "    console.log('Saved token to {{auth_token}}');",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"9932209994\",\n  \"otp\": \"{{test_otp}}\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/verify-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "verify-otp"]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "name": "1.3 Star SFA - Employee (7070894886)",
-          "item": [
-            {
-              "name": "Send OTP - SFA Employee",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.debug_otp) {",
-                      "    pm.collectionVariables.set('test_otp', res.debug_otp);",
-                      "    console.log('OTP captured:', res.debug_otp);",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"7070894886\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/send-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "send-otp"]
-                }
-              }
-            },
-            {
-              "name": "Verify OTP - SFA Employee",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.status === true && res.star_one_session_token) {",
-                      "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
-                      "    console.log('Saved token to {{auth_token}}');",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"7070894886\",\n  \"otp\": \"{{test_otp}}\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/verify-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "verify-otp"]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "name": "1.4 Star Saathi - Primary Dealer (9862216455)",
-          "item": [
-            {
-              "name": "Send OTP - Saathi Primary Dealer",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.debug_otp) {",
-                      "    pm.collectionVariables.set('test_otp', res.debug_otp);",
-                      "    console.log('OTP captured:', res.debug_otp);",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"9862216455\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/send-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "send-otp"]
-                }
-              }
-            },
-            {
-              "name": "Verify OTP - Saathi Primary Dealer",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.status === true && res.star_one_session_token) {",
-                      "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
-                      "    console.log('Saved token to {{auth_token}}');",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"9862216455\",\n  \"otp\": \"{{test_otp}}\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/verify-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "verify-otp"]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "name": "1.5 Star Saathi - Broker (7044497293)",
-          "item": [
-            {
-              "name": "Send OTP - Saathi Broker",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.debug_otp) {",
-                      "    pm.collectionVariables.set('test_otp', res.debug_otp);",
-                      "    console.log('OTP captured:', res.debug_otp);",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"7044497293\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/send-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "send-otp"]
-                }
-              }
-            },
-            {
-              "name": "Verify OTP - Saathi Broker",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.status === true && res.star_one_session_token) {",
-                      "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
-                      "    console.log('Saved token to {{auth_token}}');",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"7044497293\",\n  \"otp\": \"{{test_otp}}\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/verify-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "verify-otp"]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "name": "1.6 Star Link - Mason / Contractor (6002041778)",
-          "item": [
-            {
-              "name": "Send OTP - Link Contractor",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.debug_otp) {",
-                      "    pm.collectionVariables.set('test_otp', res.debug_otp);",
-                      "    console.log('OTP captured:', res.debug_otp);",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"6002041778\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/send-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "send-otp"]
-                }
-              }
-            },
-            {
-              "name": "Verify OTP - Link Contractor",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const res = pm.response.json();",
-                      "if (res.status === true && res.star_one_session_token) {",
-                      "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
-                      "    console.log('Saved token to {{auth_token}}');",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mobile_number\": \"6002041778\",\n  \"otp\": \"{{test_otp}}\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/v1/sso/verify-otp",
-                  "host": ["{{base_url}}"],
-                  "path": ["v1", "sso", "verify-otp"]
-                }
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "2. Product Launch APIs (Stage 2)",
-      "description": "Exchanges session JWT for the authentic legacy application payloads. Optional device telemetry fields (device_id, registration_id/fcm_token, device_type, app_version) can be sent in the JSON body.",
-      "item": [
-        {
-          "name": "Launch Star Stellar (JSON format)",
+          "name": "1.1 Get Skillmine Hosted Login URL",
           "request": {
-            "method": "POST",
+            "method": "GET",
             "header": [
               {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              },
-              {
-                "key": "Content-Type",
+                "key": "Accept",
                 "value": "application/json"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"device_id\": \"emulator-5554\",\n  \"registration_id\": \"fcm_token_stellar_sample\",\n  \"device_type\": \"ANDROID\"\n}"
-            },
             "url": {
-              "raw": "{{base_url}}/v1/sso/launch/star_steller",
-              "host": ["{{base_url}}"],
-              "path": ["v1", "sso", "launch", "star_steller"]
-            },
-            "description": "Launches Star Stellar. Returns legacy JSON structure with process_status=YES, user details, and profile picture URL."
+              "raw": "{{base_url}}/v1/auth/skillmine/login-url?state=test_state_123",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "skillmine",
+                "login-url"
+              ],
+              "query": [
+                {
+                  "key": "state",
+                  "value": "test_state_123"
+                }
+              ]
+            }
           }
         },
         {
-          "name": "Launch Star SFA (XML format)",
+          "name": "1.2 Skillmine Callback (Code Exchange -> StarOne JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.star_one_session_token) {",
+                  "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
+                  "    console.log('StarOne JWT Session Token saved:', res.star_one_session_token);",
+                  "}",
+                  "if (res.skillmine_access_token) {",
+                  "    pm.collectionVariables.set('skillmine_access_token', res.skillmine_access_token);",
+                  "    console.log('Skillmine Access Token saved:', res.skillmine_access_token);",
+                  "}",
+                  "if (res.skillmine_id_token) {",
+                  "    pm.collectionVariables.set('skillmine_id_token', res.skillmine_id_token);",
+                  "    console.log('Skillmine ID Token saved:', res.skillmine_id_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
               {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
+                "key": "Content-Type",
+                "value": "application/json"
               },
               {
-                "key": "Content-Type",
+                "key": "Accept",
                 "value": "application/json"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"device_id\": \"emulator-5554\",\n  \"registration_id\": \"fcm_token_sfa_sample\"\n}"
+              "raw": "{\n  \"code\": \"{{skillmine_code}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/v1/sso/launch/star_sfa",
-              "host": ["{{base_url}}"],
-              "path": ["v1", "sso", "launch", "star_sfa"]
-            },
-            "description": "Launches Star SFA. Returns legacy XML payload matching emplogin-check-6.0.1.php."
+              "raw": "{{base_url}}/v1/auth/callback",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "callback"
+              ]
+            }
           }
         },
         {
-          "name": "Launch Star Saathi (Encrypted Hex format)",
+          "name": "1.3 Federated Logout",
           "request": {
             "method": "POST",
             "header": [
@@ -561,139 +127,133 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"device_id\": \"emulator-5554\",\n  \"registration_id\": \"fcm_token_saathi_sample\",\n  \"device_type\": \"ANDROID\",\n  \"app_version\": \"6.0\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/v1/sso/launch/star_saathi",
-              "host": ["{{base_url}}"],
-              "path": ["v1", "sso", "launch", "star_saathi"]
-            },
-            "description": "Launches Star Saathi. Returns AES-128-CBC encrypted hex response matching customer-login-6.0.1.php."
-          }
-        },
-        {
-          "name": "Launch Star Link (JSON format)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
               },
               {
-                "key": "Content-Type",
+                "key": "Accept",
                 "value": "application/json"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"device_type\": \"ANDROID\",\n  \"device_name\": \"Samsung Galaxy S22\",\n  \"app_version\": \"1.0.0\",\n  \"fcm_token\": \"fcm_token_link_sample\",\n  \"preferred_app_lang\": \"en\"\n}"
+              "raw": "{\n  \"access_token\": \"{{skillmine_access_token}}\",\n  \"id_token\": \"{{skillmine_id_token}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/v1/sso/launch/star_link",
-              "host": ["{{base_url}}"],
-              "path": ["v1", "sso", "launch", "star_link"]
-            },
-            "description": "Launches Star Link. Returns JSON profile with Passport OAuth token, mason points, category, and linked dealers."
-          }
-        },
-        {
-          "name": "Launch Dynamic (using {{product_key}})",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"device_id\": \"emulator-5554\",\n  \"device_type\": \"ANDROID\",\n  \"registration_id\": \"fcm_token_sample\",\n  \"app_version\": \"1.0.0\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/v1/sso/launch/{{product_key}}",
-              "host": ["{{base_url}}"],
-              "path": ["v1", "sso", "launch", "{{product_key}}"]
-            },
-            "description": "Dynamic launch request using collection variable {{product_key}}."
+              "raw": "{{base_url}}/v1/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "logout"
+              ]
+            }
           }
         }
       ]
     },
     {
-      "name": "3. Error & Validation Cases",
-      "description": "Negative and edge case tests.",
+      "name": "2. Local Standalone OTP Flow (Mock / Offline)",
       "item": [
         {
-          "name": "Send OTP - Non-existent User (404)",
+          "name": "2.1 Send OTP (Local)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.debug_otp) {",
+                  "    pm.collectionVariables.set('test_otp', res.debug_otp);",
+                  "    console.log('Captured debug_otp:', res.debug_otp);",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"mobile_number\": \"0000000000\"\n}"
+              "raw": "{\n  \"mobile_number\": \"{{test_mobile}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/v1/sso/send-otp",
-              "host": ["{{base_url}}"],
-              "path": ["v1", "sso", "send-otp"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "sso",
+                "send-otp"
+              ]
             }
           }
         },
         {
-          "name": "Verify OTP - Wrong OTP (401)",
+          "name": "2.2 Verify OTP (Local -> Saves Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.star_one_session_token) {",
+                  "    pm.collectionVariables.set('auth_token', res.star_one_session_token);",
+                  "    console.log('StarOne JWT Session Token saved:', res.star_one_session_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
                 "value": "application/json"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"mobile_number\": \"8638510331\",\n  \"otp\": \"000000\"\n}"
+              "raw": "{\n  \"mobile_number\": \"{{test_mobile}}\",\n  \"otp\": \"{{test_otp}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/v1/sso/verify-otp",
-              "host": ["{{base_url}}"],
-              "path": ["v1", "sso", "verify-otp"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "sso",
+                "verify-otp"
+              ]
             }
           }
-        },
+        }
+      ]
+    },
+    {
+      "name": "3. Product Launch Hand-offs",
+      "item": [
         {
-          "name": "Launch - Missing Authorization Header (401)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/v1/sso/launch/star_steller",
-              "host": ["{{base_url}}"],
-              "path": ["v1", "sso", "launch", "star_steller"]
-            }
-          }
-        },
-        {
-          "name": "Launch - Unauthorized Product For User (403)",
+          "name": "3.1 Launch Star Saathi (AES-128 Hex)",
           "request": {
             "method": "POST",
             "header": [
@@ -704,14 +264,136 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_id\": \"DEV_ANDROID_101\",\n  \"registration_id\": \"fcm_token_from_mobile_app\",\n  \"device_type\": \"ANDROID\",\n  \"app_version\": \"6.0\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/v1/sso/launch/star_saathi",
-              "host": ["{{base_url}}"],
-              "path": ["v1", "sso", "launch", "star_saathi"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "sso",
+                "launch",
+                "star_saathi"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.2 Launch Star SFA (XML Recordset)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/xml"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_id\": \"DEV_SFA_101\",\n  \"registration_id\": \"fcm_token_from_mobile_app\"\n}"
             },
-            "description": "Test using an auth token from a user who has no access to Star Saathi."
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_sfa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "sso",
+                "launch",
+                "star_sfa"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.3 Launch Star Link (JSON + Native Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_type\": \"ANDROID\",\n  \"device_name\": \"Samsung Galaxy S22\",\n  \"app_version\": \"1.0.0\",\n  \"fcm_token\": \"fcm_token_from_mobile_app\",\n  \"preferred_app_lang\": \"en\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_link",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "sso",
+                "launch",
+                "star_link"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.4 Launch Star Stellar (Engineer JSON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_id\": \"DEV_STELLAR_101\",\n  \"registration_id\": \"fcm_token_from_mobile_app\",\n  \"device_type\": \"ANDROID\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sso/launch/star_steller",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "sso",
+                "launch",
+                "star_steller"
+              ]
+            }
           }
         }
       ]

@@ -385,9 +385,6 @@ class SyncLegacyUsers extends Command
         foreach (DB::table('user_product_access')->select('user_id', 'product_id')->get() as $a) {
             $this->accessSet["{$a->user_id}:{$a->product_id}"] = true;
         }
-        foreach (DB::table('user_product_metadata')->select('user_id', 'product_id')->get() as $m) {
-            $this->metaSet["{$m->user_id}:{$m->product_id}"] = true;
-        }
     }
 
     private function ensureUser(string $phone, string $name, ?string $email): int
@@ -433,28 +430,6 @@ class SyncLegacyUsers extends Command
             DB::table('user_product_access')
                 ->where('user_id', $userId)->where('product_id', $productId)
                 ->update(['role_name' => mb_substr($roleName, 0, 100)]);
-        }
-
-        if ($this->option('with-meta')) {
-            if (!isset($this->metaSet[$key])) {
-                $now = now();
-                DB::table('user_product_metadata')->insert([
-                    'user_id'    => $userId,
-                    'product_id' => $productId,
-                    'attributes' => json_encode($attributes),
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
-                $this->metaSet[$key] = true;
-            } elseif ($overwriteExisting || $this->option('refresh')) {
-                // $overwriteExisting: dealer row replacing a previously-written ship-to-party row.
-                // --refresh flag: full re-sync requested by the operator.
-                DB::table('user_product_metadata')
-                    ->where('user_id', $userId)->where('product_id', $productId)
-                    ->update(['attributes' => json_encode($attributes)]);
-            } else {
-                $this->bump('shared_phone_kept_first');
-            }
         }
 
         $this->bump('processed');

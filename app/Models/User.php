@@ -15,10 +15,10 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(UserProductAccess::class);
     }
 
-    public function productMetadata(): HasMany
-    {
-        return $this->hasMany(UserProductMetadata::class);
-    }
+    // public function productMetadata(): HasMany
+    // {
+    //     return $this->hasMany(UserProductMetadata::class);
+    // }
 
     public function getJWTIdentifier() { return $this->getKey(); }
     public function getJWTCustomClaims() { return []; }
